@@ -64,30 +64,70 @@
 // exports.copy = copy;
 
 
+// const gulp = require('gulp');
+// const sass = require('gulp-sass')(require('sass'));
+// const autoprefixer = require('gulp-autoprefixer');
+// const sourcemaps = require('gulp-sourcemaps');
+// const browserSync = require('browser-sync').create();
+
+// gulp.task('sass', function() {
+//     return gulp.src('./scss/**/*.scss')
+//         .pipe(sourcemaps.init())
+//         .pipe(sass().on('error', sass.logError))
+//         .pipe(autoprefixer())
+//         .pipe(sourcemaps.write('.'))
+//         .pipe(gulp.dest('./css'))
+//         .pipe(browserSync.stream());
+// });
+
+// gulp.task('serve', function() {
+//     browserSync.init({
+//         server: "./"
+//     });
+
+//     gulp.watch('./scss/**/*.scss', gulp.series('sass'));
+//     gulp.watch("./*.html").on('change', browserSync.reload);
+// });
+
+// gulp.task('build', gulp.series('sass'));
+// gulp.task('default', gulp.series('serve'));
+
+
 const gulp = require('gulp');
 const sass = require('gulp-sass')(require('sass'));
 const autoprefixer = require('gulp-autoprefixer');
 const sourcemaps = require('gulp-sourcemaps');
-const browserSync = require('browser-sync').create();
+const del = require('del');
 
-gulp.task('sass', function() {
-    return gulp.src('./scss/**/*.scss')
-        .pipe(sourcemaps.init())
-        .pipe(sass().on('error', sass.logError))
-        .pipe(autoprefixer())
-        .pipe(sourcemaps.write('.'))
-        .pipe(gulp.dest('./css'))
-        .pipe(browserSync.stream());
-});
+// Paths
+const paths = {
+  styles: {
+    src: 'src/scss/**/*.scss',
+    dest: 'dist/css'
+  },
+  // Other paths
+};
 
-gulp.task('serve', function() {
-    browserSync.init({
-        server: "./"
-    });
+// Clean output directory
+function clean() {
+  return del(['dist']);
+}
 
-    gulp.watch('./scss/**/*.scss', gulp.series('sass'));
-    gulp.watch("./*.html").on('change', browserSync.reload);
-});
+// Compile Sass
+function styles() {
+  return gulp.src(paths.styles.src)
+    .pipe(sourcemaps.init())
+    .pipe(sass().on('error', sass.logError))
+    .pipe(autoprefixer())
+    .pipe(sourcemaps.write('.'))
+    .pipe(gulp.dest(paths.styles.dest));
+}
 
-gulp.task('build', gulp.series('sass'));
-gulp.task('default', gulp.series('serve'));
+// Define tasks
+const build = gulp.series(clean, styles);
+
+// Export tasks
+exports.clean = clean;
+exports.styles = styles;
+exports.build = build;
+exports.default = build;
